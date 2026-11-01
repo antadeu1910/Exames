@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel de exames – Anderson</title>
+<style>
+:root{--bg:#f6f7f8;--card:#fff;--tx:#1b2226;--mu:#5d6a72;--ln:#dde2e5;--ac:#1f5f7a;--g:#2e8b57;--r:#c0392b;--y:#c98a00;--gb:#e3f3ea;--rb:#fbe7e4;--yb:#fff2d6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14181a;--card:#1d2326;--tx:#e8ecee;--mu:#9aa6ac;--ln:#333b3f;--ac:#7cc1dc;--g:#5cc489;--r:#ef7f72;--y:#e6b84d;--gb:#1d3a2b;--rb:#412421;--yb:#3d3317;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14181a;--card:#1d2326;--tx:#e8ecee;--mu:#9aa6ac;--ln:#333b3f;--ac:#7cc1dc;--g:#5cc489;--r:#ef7f72;--y:#e6b84d;--gb:#1d3a2b;--rb:#412421;--yb:#3d3317;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 "Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{max-width:980px;margin:0 auto;padding:22px 16px 6px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+h1{font-size:1.45rem;margin:0}h2{font-size:1.1rem;margin:0 0 10px}
+.sub{color:var(--mu);font-size:.9rem;margin:2px 0 0}
+button{font:inherit;cursor:pointer;color:var(--tx)}
+.theme{border:1px solid var(--ln);background:var(--card);border-radius:8px;padding:6px 10px}
+nav{max-width:980px;margin:8px auto 0;padding:0 16px;display:flex;gap:6px;overflow-x:auto}
+nav button{border:1px solid var(--ln);background:var(--card);border-radius:8px;padding:8px 14px;white-space:nowrap}
+nav button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+main{max-width:980px;margin:0 auto;padding:14px 16px 48px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:12px 14px;text-align:left}
+.card b{display:block;font-size:1.7rem;line-height:1.1}.card span{color:var(--mu);font-size:.85rem}
+.panel{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:14px;margin-bottom:14px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--ln);vertical-align:middle}
+th{color:var(--mu);font-weight:600;white-space:nowrap}th.s{cursor:pointer}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.82rem;white-space:nowrap}
+.melhor,.ok{background:var(--gb);color:var(--g)}.pior,.alto,.baixo{background:var(--rb);color:var(--r)}.igual,.limite{background:var(--yb);color:var(--y)}
+.bar{height:8px;border-radius:4px;background:var(--ln);position:relative;min-width:90px}
+.bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;opacity:.85}
+.bar u{position:absolute;left:0;top:0;bottom:0;border-radius:4px;opacity:.35;text-decoration:none}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.chips button{border:1px solid var(--ln);background:var(--bg);border-radius:999px;padding:4px 12px;font-size:.88rem}
+.chips button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.note{color:var(--mu);font-size:.86rem;margin:8px 0 0}
+input[type=search]{font:inherit;border:1px solid var(--ln);background:var(--bg);color:var(--tx);border-radius:8px;padding:6px 10px;width:100%;max-width:260px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<header><div><h1>Painel de exames – Anderson</h1><p class="sub">Coleta de 20/08/2026 · comparação com 2025 · não substitui o médico</p></div><button class="theme" id="th" aria-label="Alternar tema">Tema</button></header>
+<nav id="nav"></nav>
+<main id="app"></main>
+<script>
+var CMP=[
+{n:"Glicose",u:"mg/dL",a:106,b:107,ref:"70 a 99",st:"igual"},
+{n:"Triglicérides",u:"mg/dL",a:160,b:251,ref:"abaixo de 150 (jejum) / 175",st:"pior"},
+{n:"Colesterol total",u:"mg/dL",a:215,b:197,ref:"abaixo de 190",st:"melhor"},
+{n:"LDL",u:"mg/dL",a:146,b:117,ref:"meta conforme o risco",st:"melhor"},
+{n:"Não-HDL",u:"mg/dL",a:176,b:153,ref:"meta conforme o risco",st:"melhor"},
+{n:"HDL",u:"mg/dL",a:39,b:44,ref:"acima de 40",st:"melhor"},
+{n:"Creatinina",u:"mg/dL",a:1.26,b:1.08,ref:"0,70 a 1,30",st:"melhor"},
+{n:"eGFR",u:"mL/min/1,73m²",a:73,b:88,ref:"acima de 90",st:"melhor"},
+{n:"CK/CPK",u:"U/L",a:192,b:111,ref:"38 a 174",st:"melhor"},
+{n:"TSH",u:"µUI/mL",a:2.4,b:2.77,ref:"0,40 a 4,50",st:"igual",nt:"2025: 5,4 em 02/07 e 2,4 em 23/07"}
+];
+var G={
+"Ferro e sangue":[["Ferritina","7,8 ng/mL","22,0 a 322,0","baixo"],["Ferro sérico","36 µg/dL","65 a 175","baixo"],["Hemoglobina","12,4 g/dL","13,0 a 17,0","baixo"],["Hematócrito","39,1 %","40,0 a 50,0","baixo"],["Eritrócitos","4,47 mi/µL","4,50 a 5,50","baixo"],["RDW","16,3 %","11,6 a 14,0","alto"],["VCM","87,4 fL","83,0 a 101,0","ok"],["Plaquetas","379.000/µL","150.000 a 450.000","ok"],["Leucócitos","4.660/µL","4.000 a 10.000","ok"]],
+"Glicose e gorduras":[["Glicose","107 mg/dL","70 a 99","alto"],["Insulina","14,3 µUI/mL","2,5 a 13,1","alto"],["HOMA-IR","3,78","abaixo de 2,70","alto"],["HbA1c","5,6 %","normal abaixo de 5,7","limite"],["Triglicérides","251 mg/dL","abaixo de 150 / 175","alto"],["Colesterol total","197 mg/dL","abaixo de 190","alto"],["HDL","44 mg/dL","acima de 40","ok"],["LDL","117 mg/dL","meta baixo risco: abaixo de 115","limite"],["Não-HDL","153 mg/dL","meta baixo risco: abaixo de 145","limite"],["Apo B","117 mg/dL","meta baixo risco: abaixo de 100","limite"],["Apo A","126 mg/dL","104 a 202","ok"]],
+"Urina e rim":[["Proteína (urina)","Positivo (+)","Negativo","alto"],["Oxalato de cálcio","Positivo (+)","Negativo","alto"],["Densidade","1.028","1.005 a 1.035","ok"],["Creatinina","1,08 mg/dL","0,70 a 1,30","ok"],["eGFR","88","acima de 90","limite"],["Ureia","28 mg/dL","19 a 49","ok"]],
+"Vitaminas e outros":[["Vitamina D","29 ng/mL","acima de 20 (30 a 60 em grupos de risco)","limite"],["Vitamina B12","702 pg/mL","223 a 672","limite"],["TSH","2,77 µUI/mL","0,40 a 4,30","ok"],["T4 livre","1,23 ng/dL","0,89 a 1,76","ok"],["T3","111 ng/dL","60 a 181","ok"],["TGO / TGP","17 / 21 U/L","até 34 / 10 a 49","ok"],["GGT","28 U/L","abaixo de 73","ok"],["PCR ultrassensível","0,10 mg/dL","abaixo de 0,20","ok"],["Homocisteína","5,7 µmol/L","5,5 a 16,2","ok"]],
+"Coração":[["ECG de repouso (24/07)","FC 52 bpm","Ritmo sinusal, bradicardia sinusal","limite"],["Teste ergométrico (26/08)","157 bpm · 9,55 METs","Resposta normal ao esforço; aptidão regular","ok"],["Pressão no teste","130/80 → 185/85","Resposta normal","ok"],["Ecocardiograma (26/08)","FE 63 %","Normal; insuficiência mitral mínima","ok"]]
+};
+var LBL={melhor:"melhorou",pior:"piorou",igual:"igual",ok:"normal",alto:"alto",baixo:"baixo",limite:"atenção"};
+var tabs=["Visão geral","Comparação 2025 × 2026"].concat(Object.keys(G));
+var cur=0,flt="todos",sortK=null,asc=true,q="";
+function fmt(v){return String(v).replace(".",",")}
+function pill(s){return '<span class="pill '+s+'">'+LBL[s]+'</span>'}
+function cnt(s){return CMP.filter(function(r){return r.st===s}).length}
+function out(){var n=0;for(var k in G)G[k].forEach(function(r){if(r[3]==="alto"||r[3]==="baixo")n++});return n}
+function nav(){document.getElementById("nav").innerHTML=tabs.map(function(t,i){return '<button class="'+(i===cur?"on":"")+'" onclick="go('+i+')">'+t+'</button>'}).join("")}
+function go(i){cur=i;nav();render()}
+function setF(f){flt=f;go(1)}
+function over(){
+ return '<div class="cards"><button class="card" onclick="setF(\'melhor\')"><b style="color:var(--g)">'+cnt("melhor")+'</b><span>melhoraram de 2025 para 2026</span></button>'+
+ '<button class="card" onclick="setF(\'pior\')"><b style="color:var(--r)">'+cnt("pior")+'</b><span>piorou (triglicérides)</span></button>'+
+ '<button class="card" onclick="setF(\'igual\')"><b style="color:var(--y)">'+cnt("igual")+'</b><span>estáveis (glicose, TSH)</span></button>'+
+ '<button class="card" onclick="go(2)"><b>'+out()+'</b><span>valores fora do intervalo em 2026</span></button></div>'+
+ '<div class="panel"><h2>Pontos para levar ao Dr. Alex</h2><ul><li>Ferritina 7,8 e ferro 36, com hemoglobina 12,4: investigar a causa da ferropenia.</li><li>Insulina 14,3, HOMA-IR 3,78, glicose 107 e triglicérides 251: resistência à insulina.</li><li>Proteína (+) e oxalato de cálcio (+) na urina, com eGFR 88: repetir o exame.</li><li>LDL, não-HDL e Apo B acima das metas de risco baixo.</li><li>ECG com bradicardia sinusal e alterações difusas da repolarização no teste.</li></ul></div>'+
+ '<p class="note">Toque num cartão para filtrar a comparação. Os dados vêm dos laudos de 02/07/2025, 23/07/2025 e 20/08/2026.</p>'
+}
+function cmp(){
+ var rows=CMP.filter(function(r){return(flt==="todos"||r.st===flt)&&r.n.toLowerCase().indexOf(q)>-1});
+ if(sortK){rows=rows.slice().sort(function(x,y){var a=x[sortK],b=y[sortK];return(typeof a==="string"?a.localeCompare(b):a-b)*(asc?1:-1)})}
+ var chips=["todos","melhor","pior","igual"].map(function(f){return '<button class="'+(f===flt?"on":"")+'" onclick="flt=\''+f+'\';render()">'+(f==="todos"?"Todos":LBL[f])+'</button>'}).join("");
+ var body=rows.map(function(r){var mx=Math.max(r.a,r.b),c=r.st==="melhor"?"var(--g)":r.st==="pior"?"var(--r)":"var(--y)";var d=r.b-r.a,p=(d/r.a*100);
+ return '<tr><td><b>'+r.n+'</b><div class="note" style="margin:0">'+r.u+(r.nt?" · "+r.nt:"")+'</div></td><td>'+fmt(r.a)+'</td><td><b>'+fmt(r.b)+'</b></td><td>'+(d>0?"+":"")+fmt(+d.toFixed(2))+' ('+(p>0?"+":"")+p.toFixed(0)+'%)</td><td><div class="bar"><u style="width:'+(r.a/mx*100)+'%;background:var(--mu)"></u><i style="width:'+(r.b/mx*100)+'%;background:'+c+'"></i></div></td><td>'+pill(r.st)+'</td><td>'+r.ref+'</td></tr>'}).join("");
+ var th=function(k,t){return '<th class="s" onclick="sortK=\''+k+'\';asc=(sortK===\''+k+'\')?!asc:true;render()">'+t+(sortK===k?(asc?" ▲":" ▼"):"")+'</th>'};
+ return '<div class="panel"><h2>2025 × 2026</h2><div class="chips">'+chips+'</div><input type="search" placeholder="Buscar exame" value="'+q+'" oninput="q=this.value.toLowerCase();render(true)"><div class="tw"><table><thead><tr>'+th("n","Exame")+th("a","2025")+th("b","2026")+'<th>Variação</th><th>Barras</th>'+th("st","Situação")+'<th>Referência</th></tr></thead><tbody>'+body+'</tbody></table></div><p class="note">Barra cinza: 2025. Barra colorida: 2026. Ordene tocando no título da coluna. A referência segue o laudo mais recente.</p></div>'
+}
+function grp(k){
+ return '<div class="panel"><h2>'+k+' · 20/08/2026</h2><div class="tw"><table><thead><tr><th>Exame</th><th>Resultado</th><th>Referência</th><th>Situação</th></tr></thead><tbody>'+G[k].map(function(r){return '<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td><td>'+r[2]+'</td><td>'+pill(r[3])+'</td></tr>'}).join("")+'</tbody></table></div></div>'
+}
+function render(keep){
+ var a=document.getElementById("app"),h=cur===0?over():cur===1?cmp():grp(tabs[cur]);
+ a.innerHTML=h;
+ if(keep){var i=a.querySelector("input");if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
+}
+document.getElementById("th").onclick=function(){var r=document.documentElement,d=r.getAttribute("data-theme");var dark=d?d==="dark":matchMedia("(prefers-color-scheme:dark)").matches;r.setAttribute("data-theme",dark?"light":"dark")};
+nav();render();
+</script>
+</body>
+</html>
