@@ -53,7 +53,15 @@ var CMP=[
 {n:"Creatinina",u:"mg/dL",a:1.26,b:1.08,ref:"0,70 a 1,30",st:"melhor"},
 {n:"eGFR",u:"mL/min/1,73m²",a:73,b:88,ref:"acima de 90",st:"melhor"},
 {n:"CK/CPK",u:"U/L",a:192,b:111,ref:"38 a 174",st:"melhor"},
-{n:"TSH",u:"µUI/mL",a:2.4,b:2.77,ref:"0,40 a 4,50",st:"igual",nt:"2025: 5,4 em 02/07 e 2,4 em 23/07"}
+{n:"TSH",u:"µUI/mL",a:2.4,b:2.77,ref:"0,40 a 4,50",st:"igual",nt:"2025: 5,4 em 02/07 e 2,4 em 23/07"},
+{n:"Hemoglobina",u:"g/dL",a:13.5,b:12.4,ref:"13,0 a 17,0 (2026)",st:"pior"},
+{n:"Eritrócitos",u:"milhões/µL",a:5.00,b:4.47,ref:"4,50 a 5,50 (2026)",st:"pior"},
+{n:"VCM",u:"fL",a:80.4,b:87.4,ref:"83,0 a 101,0 (2026)",st:"melhor",nt:"2025: levemente baixo no laudo de 2025"},
+{n:"RDW",u:"%",a:15.4,b:16.3,ref:"11,6 a 14,0",st:"pior",nt:"alto nos dois anos"},
+{n:"VLDL",u:"mg/dL",a:30,b:36,ref:"abaixo de 30 (jejum) / 35",st:"pior"},
+{n:"HbA1c",u:"%",a:5.7,b:5.6,ref:"normal abaixo de 5,7",st:"igual",nt:"no limite nos dois anos"},
+{n:"TGO",u:"U/L",a:19,b:17,ref:"até 34 a 40",st:"igual"},
+{n:"TGP",u:"U/L",a:24,b:21,ref:"10 a 49",st:"igual"}
 ];
 var G={
 "Ferro e sangue":[["Ferritina","7,8 ng/mL","22,0 a 322,0","baixo"],["Ferro sérico","36 µg/dL","65 a 175","baixo"],["Hemoglobina","12,4 g/dL","13,0 a 17,0","baixo"],["Hematócrito","39,1 %","40,0 a 50,0","baixo"],["Eritrócitos","4,47 mi/µL","4,50 a 5,50","baixo"],["RDW","16,3 %","11,6 a 14,0","alto"],["VCM","87,4 fL","83,0 a 101,0","ok"],["Plaquetas","379.000/µL","150.000 a 450.000","ok"],["Leucócitos","4.660/µL","4.000 a 10.000","ok"]],
@@ -74,10 +82,10 @@ function go(i){cur=i;nav();render()}
 function setF(f){flt=f;go(1)}
 function over(){
  return '<div class="cards"><button class="card" onclick="setF(\'melhor\')"><b style="color:var(--g)">'+cnt("melhor")+'</b><span>melhoraram de 2025 para 2026</span></button>'+
- '<button class="card" onclick="setF(\'pior\')"><b style="color:var(--r)">'+cnt("pior")+'</b><span>piorou (triglicérides)</span></button>'+
- '<button class="card" onclick="setF(\'igual\')"><b style="color:var(--y)">'+cnt("igual")+'</b><span>estáveis (glicose, TSH)</span></button>'+
+ '<button class="card" onclick="setF(\'pior\')"><b style="color:var(--r)">'+cnt("pior")+'</b><span>pioraram (triglicérides, hemoglobina e outros)</span></button>'+
+ '<button class="card" onclick="setF(\'igual\')"><b style="color:var(--y)">'+cnt("igual")+'</b><span>estáveis (glicose, TSH, HbA1c)</span></button>'+
  '<button class="card" onclick="go(2)"><b>'+out()+'</b><span>valores fora do intervalo em 2026</span></button></div>'+
- '<div class="panel"><h2>Pontos para levar ao Dr. Alex</h2><ul><li>Ferritina 7,8 e ferro 36, com hemoglobina 12,4: investigar a causa da ferropenia.</li><li>Insulina 14,3, HOMA-IR 3,78, glicose 107 e triglicérides 251: resistência à insulina.</li><li>Proteína (+) e oxalato de cálcio (+) na urina, com eGFR 88: repetir o exame.</li><li>LDL, não-HDL e Apo B acima das metas de risco baixo.</li><li>ECG com bradicardia sinusal e alterações difusas da repolarização no teste.</li></ul></div>'+
+ '<div class="panel"><h2>Pontos para levar ao Dr. Alex</h2><ul><li>Ferritina 7,8 e ferro 36, com hemoglobina 12,4 (13,5 em 2025): investigar a causa da ferropenia. O RDW já estava alto e o VCM e o HCM levemente baixos em 2025.</li><li>Insulina 14,3, HOMA-IR 3,78, glicose 107 e triglicérides 251: resistência à insulina.</li><li>Proteína (+) e oxalato de cálcio (+) na urina, com eGFR 88: repetir o exame.</li><li>LDL, não-HDL e Apo B acima das metas de risco baixo.</li><li>ECG com bradicardia sinusal e alterações difusas da repolarização no teste.</li></ul></div>'+
  '<p class="note">Toque num cartão para filtrar a comparação. Os dados vêm dos laudos de 02/07/2025, 23/07/2025 e 20/08/2026.</p>'
 }
 function cmp(){
@@ -87,7 +95,7 @@ function cmp(){
  var body=rows.map(function(r){var mx=Math.max(r.a,r.b),c=r.st==="melhor"?"var(--g)":r.st==="pior"?"var(--r)":"var(--y)";var d=r.b-r.a,p=(d/r.a*100);
  return '<tr><td><b>'+r.n+'</b><div class="note" style="margin:0">'+r.u+(r.nt?" · "+r.nt:"")+'</div></td><td>'+fmt(r.a)+'</td><td><b>'+fmt(r.b)+'</b></td><td>'+(d>0?"+":"")+fmt(+d.toFixed(2))+' ('+(p>0?"+":"")+p.toFixed(0)+'%)</td><td><div class="bar"><u style="width:'+(r.a/mx*100)+'%;background:var(--mu)"></u><i style="width:'+(r.b/mx*100)+'%;background:'+c+'"></i></div></td><td>'+pill(r.st)+'</td><td>'+r.ref+'</td></tr>'}).join("");
  var th=function(k,t){return '<th class="s" onclick="sortK=\''+k+'\';asc=(sortK===\''+k+'\')?!asc:true;render()">'+t+(sortK===k?(asc?" ▲":" ▼"):"")+'</th>'};
- return '<div class="panel"><h2>2025 × 2026</h2><div class="chips">'+chips+'</div><input type="search" placeholder="Buscar exame" value="'+q+'" oninput="q=this.value.toLowerCase();render(true)"><div class="tw"><table><thead><tr>'+th("n","Exame")+th("a","2025")+th("b","2026")+'<th>Variação</th><th>Barras</th>'+th("st","Situação")+'<th>Referência</th></tr></thead><tbody>'+body+'</tbody></table></div><p class="note">Barra cinza: 2025. Barra colorida: 2026. Ordene tocando no título da coluna. A referência segue o laudo mais recente.</p></div>'
+ return '<div class="panel"><h2>2025 × 2026</h2><div class="chips">'+chips+'</div><input type="search" placeholder="Buscar exame" value="'+q+'" oninput="q=this.value.toLowerCase();render(true)"><div class="tw"><table><thead><tr>'+th("n","Exame")+th("a","2025")+th("b","2026")+'<th>Variação</th><th>Barras</th>'+th("st","Situação")+'<th>Referência</th></tr></thead><tbody>'+body+'</tbody></table></div><p class="note">Barra cinza: 2025. Barra colorida: 2026. Ordene tocando no título da coluna. A referência segue o laudo mais recente. Os laboratórios de 2025 e 2026 são diferentes, e as referências variam.</p></div>'
 }
 function grp(k){
  return '<div class="panel"><h2>'+k+' · 20/08/2026</h2><div class="tw"><table><thead><tr><th>Exame</th><th>Resultado</th><th>Referência</th><th>Situação</th></tr></thead><tbody>'+G[k].map(function(r){return '<tr><td>'+r[0]+'</td><td><b>'+r[1]+'</b></td><td>'+r[2]+'</td><td>'+pill(r[3])+'</td></tr>'}).join("")+'</tbody></table></div></div>'
